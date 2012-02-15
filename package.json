@@ -8,7 +8,7 @@
 	},
 	"bugs": "https://github.com/vvoovv/djeo-ge/issues",
 	"dependencies": {
-		"djeo": "0.1.0"
+		"djeo": "current"
 	},
 	"keywords": ["djeo", "geo"],
 	"homepage": "http://djeo.org",
