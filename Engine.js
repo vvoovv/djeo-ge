@@ -56,9 +56,6 @@ var GEngine = declare([Engine], {
 			this._initializing = function(){};
 			script.get({
 				url: "https://www.google.com/jsapi",
-				content: {
-					key: this.map.geKey || require.rawConfig.geKey
-				},
 				load: lang.hitch(this, function() {
 					this._initializing();
 					delete this._initializing;
