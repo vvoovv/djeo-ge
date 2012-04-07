@@ -119,8 +119,8 @@ var GEngine = declare([Engine], {
 			//experimentally derived distance formula
 			var alpha = u.degToRad(45.0 / (aspectRatio + 0.4) - 2.0),
 				expandToDistance = Math.max(distNS, distEW),
-				beta = Math.min(u.degToRad(90), alpha + expandToDistance/(2*EARTH_RADIUS));
-			lookAtRange = scaleRange * EARTH_RADIUS * (Math.sin(beta) * Math.sqrt(1 + 1 / Math.pow(Math.tan(alpha), 2)) - 1);
+				beta = Math.min(u.degToRad(90), alpha + expandToDistance/(2*u.earthRadius));
+			lookAtRange = scaleRange * u.earthRadius * (Math.sin(beta) * Math.sqrt(1 + 1 / Math.pow(Math.tan(alpha), 2)) - 1);
 		}
 		
 		// get the current view
@@ -174,8 +174,6 @@ var GEngine = declare([Engine], {
 	}
 });
 
-var EARTH_RADIUS = 6378135;
-
 var distance = function(point1, point2) {
 	// The following code is derived from geojs library (http://code.google.com/p/geojs/)
 	// The geojs library is licensed under the Apache License, Version 2.0
@@ -187,7 +185,7 @@ var distance = function(point1, point2) {
 		d_lmd = u.degToRad(point2[0] - point1[0]),
 		A = Math.pow(Math.sin(d_phi/2), 2) + Math.cos(phi1) * Math.cos(phi2) * Math.pow(Math.sin(d_lmd/2), 2),
 		angularDistance = 2 * Math.atan2(Math.sqrt(A), Math.sqrt(1 - A));
-	return EARTH_RADIUS * angularDistance;
+	return u.earthRadius * angularDistance;
 };
 
 return GEngine;
