@@ -10,8 +10,6 @@ define([
 	"djeo/util/_base"
 ], function(require, declare, lang, array, aspect, script, Engine, Placemark, u){
 
-var engineEvents = {onmouseover: "mouseover", onmouseout: "mouseout", onclick: "click"};
-
 var GEngine = declare([Engine], {
 	
 	type: "ge",
@@ -86,11 +84,10 @@ var GEngine = declare([Engine], {
 		return this.ge;
 	},
 	
-	connect: function(feature, event, context, method) {
+	on: function(feature, event, method, context) {
 		var placemark = feature.baseShapes[0];
 		// normalize the callback function
-		method = this.normalizeCallback(feature, event, context, method);
-		event = engineEvents[event];
+		method = this.normalizeCallback(feature, event, method, context);
 		google.earth.addEventListener(placemark, event, method);
 		return [placemark, event, method];
 	},
