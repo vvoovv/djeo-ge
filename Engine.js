@@ -143,13 +143,13 @@ var GEngine = declare([Engine], {
 	enableLayer: function(layerId, enabled) {
 		var ge = this.ge,
 			lr = ge.getLayerRoot();
-		switch (layerId) {
-			case "ROADMAP":
-			case "HYBRID":
+		switch (layerId.toLowerCase()) {
+			case "roadmap":
+			case "hybrid":
 				lr.enableLayerById(ge.LAYER_BORDERS, enabled);
 				lr.enableLayerById(ge.LAYER_ROADS, enabled);
 				break;
-			case "TERRAIN":
+			case "terrain":
 				lr.enableLayerById(ge.LAYER_TERRAIN, enabled);
 				break;
 		}
