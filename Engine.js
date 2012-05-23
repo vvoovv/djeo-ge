@@ -71,7 +71,6 @@ var GEngine = declare([Engine], {
 	
 	prepare: function() {
 		this.factories.Placemark.init();
-		this.zoomTo(this.map.extent);
 	},
 	
 	appendChild: function(child, feature) {
