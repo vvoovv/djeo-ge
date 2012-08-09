@@ -9,18 +9,15 @@ return declare(null, {
 		this.balloon = this.ge.createHtmlStringBalloon('');
 	},
 
-	pointeroverAction: function(feature) {
-		var cs = feature.state.cs,
+	process: function(event){
+		var feature = event.feature,
+			cs = feature.state.cs,
 			balloon = this.balloon,
 			content = cs.info ? cs.info(feature) : this.content(feature)
 		;
 		balloon.setContentString(content);
 		balloon.setFeature(feature.baseShapes[0]);
 		this.ge.setBalloon(balloon);
-	},
-	
-	pointeroutAction: function(feature) {
-		this.ge.setBalloon(null);
 	}
 
 });
