@@ -1,21 +1,23 @@
-dojo.provide("djeo.ge.Model");
+define([
+	"dojo/_base/declare",
+	"dojo/_base/lang",
+	"dojo/_base/Deferred",
+	"djeo/util/_base",
+	"./_base"
+], function(declare, lang, Deferred, u, e){
 
-(function() {
-
-var g = djeo,
-	u = g.util,
-	e = g.ge;
-
-dojo.declare("djeo.ge.Model", null, {
+return declare(null, {
 	
 	constructor: function(kwArgs) {
-		dojo.mixin(this, kwArgs);
+		lang.mixin(this, kwArgs);
 	},
 
 	render: function(feature) {
 		var engine = this.engine,
 			ge = engine.ge,
-			modelHref = feature.href;
+			modelHref = feature.href,
+			deferred = new Deferred()
+		;
 
 		modelHref = u.isRelativeUrl(modelHref) ? u.baseUrl+engine.map.modelBasePath+modelHref : modelHref;
 
@@ -32,12 +34,14 @@ dojo.declare("djeo.ge.Model", null, {
 				}
 				if (kmlModel) {
 					if (e.altitudeModes[feature.altitudeMode]) kmlModel.setAltitudeMode(ge[e.altitudeModes[feature.altitudeMode]]);
-					if (location) this.setLocation(feature.location, kmlModel);
-					feature.model = kmlModel;
+					//if (location) this.setLocation(feature.location, kmlModel);
+					feature.baseShapes[0] = kmlFeature;
 					ge.getFeatures().appendChild(kmlModel.getParentNode());
 				}
 			}
+			deferred.resolve();
 		}));
+		return deferred;
 	},
 	
 	translate: function(position, feature) {
@@ -86,4 +90,5 @@ dojo.declare("djeo.ge.Model", null, {
 
 });
 
-}());
+});
+

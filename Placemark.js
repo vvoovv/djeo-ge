@@ -3,10 +3,11 @@ define([
 	"dojo/_base/lang", // mixin, hitch
 	"dojo/_base/array", // forEach, map
 	"dojo/_base/Color",
+	"djeo/_base",
 	"djeo/common/Placemark",
 	"djeo/util/_base",
 	"./_base"
-], function(declare, lang, array, Color, P, u, geBase){
+], function(declare, lang, array, Color, djeo, P, u, geBase){
 
 var Placemark = declare([P], {
 
@@ -33,7 +34,7 @@ var Placemark = declare([P], {
 	makePoint: function(feature, coords) {
 		var placemark = this.createPlacemark();
 		var point = this.ge.createPoint('');
-		point.setLatLngAlt (coords[1], coords[0], getAltitude(coords));
+		point.setLatLngAlt (coords[1], coords[0], getAltitude(feature, coords));
 		this._setGeometryAttributes(feature, point);
 		placemark.setGeometry(point);
 		return placemark;
@@ -42,32 +43,32 @@ var Placemark = declare([P], {
 	makeLineString: function(feature, coords) {
 		var placemark = this.createPlacemark();
 		var lineString = this.ge.createLineString('');
-		this._makeLineString(lineString, coords);
+		this._makeLineString(feature, lineString, coords);
 		this._setGeometryAttributes(feature, lineString);
 		placemark.setGeometry(lineString);
 		return placemark;
 	},
 
-	_makeLineString: function(lineString, coords) {
+	_makeLineString: function(feature, lineString, coords) {
 		array.forEach(coords, function(point, i){
-			lineString.getCoordinates().pushLatLngAlt(point[1], point[0], getAltitude(point));
+			lineString.getCoordinates().pushLatLngAlt(point[1], point[0], getAltitude(feature, point));
 		}, this);
 	},
 
 	makePolygon: function(feature, coords) {
 		var placemark = this.createPlacemark();
 		var polygon = this.ge.createPolygon('');
-		this._makePolygon(polygon, coords);
+		this._makePolygon(feature, polygon, coords);
 		this._setGeometryAttributes(feature, polygon);
 		placemark.setGeometry(polygon);
 		return placemark;
 	},
 
-	_makePolygon: function(polygon, coords) {
+	_makePolygon: function(feature, polygon, coords) {
 		array.forEach(coords, function(lineStringCoords, i){
 			var linearRing = this.ge.createLinearRing('');
 			array.forEach(lineStringCoords, function(point){
-				linearRing.getCoordinates().pushLatLngAlt(point[1], point[0], getAltitude(point));
+				linearRing.getCoordinates().pushLatLngAlt(point[1], point[0], getAltitude(feature, point));
 			});
 			if (!i) polygon.setOuterBoundary(linearRing);
 			else polygon.getInnerBoundaries().appendChild(linearRing);
@@ -81,7 +82,7 @@ var Placemark = declare([P], {
 		placemark.setGeometry(multiLineString);
 		array.forEach(coords, function(lineStringCoords){
 			var lineString = this.ge.createLineString('');
-			this._makeLineString(lineString, lineStringCoords);
+			this._makeLineString(feature, lineString, lineStringCoords);
 			multiLineString.getGeometries().appendChild(lineString);
 		}, this);
 		return placemark;
@@ -95,16 +96,24 @@ var Placemark = declare([P], {
 		
 		array.forEach(coords, function(polygonCoords){
 			var polygon = this.ge.createPolygon('');
-			this._makePolygon(polygon, polygonCoords);
+			this._makePolygon(feature, polygon, polygonCoords);
 			multiPolygon.getGeometries().appendChild(polygon);
 		}, this);
 		return placemark;
 	},
 	
 	_setGeometryAttributes: function(feature, geometry) {
-		if (geBase.altitudeModes[feature.altitudeMode]) geometry.setAltitudeMode(this.ge[geBase.altitudeModes[feature.altitudeMode]]);
-		if (feature.extrude != undefined) geometry.setExtrude(feature.extrude);
-		if (feature.tessellate != undefined) geometry.setTessellate(feature.tessellate);
+		var altitudeMode = djeo.getTraversedAttr(feature, "altitudeMode");
+		if (geBase.altitudeModes[altitudeMode]) {
+			geometry.setAltitudeMode(this.ge[geBase.altitudeModes[altitudeMode]]);
+		}
+		var extrude = djeo.getTraversedAttr(feature, "extrude");
+		if (extrude !== undefined) {
+			geometry.setExtrude(extrude);
+		}
+		if (feature.tessellate != undefined) {
+			geometry.setTessellate(feature.tessellate);
+		}
 	},
 	
 	applyPointStyle: function(feature, calculatedStyle, coords) {
@@ -287,8 +296,8 @@ var applyStroke = function(kmlStyle, calculatedStyle, specificStyle, specificSha
 	}
 };
 
-var getAltitude = function(point) {
-	return (point.length==3) ? point[2] : 0;
+var getAltitude = function(feature, point) {
+	return (point.length==3) ? point[2] : (feature.height ? feature.height : 0);
 };
 
 return Placemark;

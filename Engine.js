@@ -1,14 +1,16 @@
 define([
 	"require",
 	"dojo/_base/declare", // declare
-	"dojo/_base/lang", // hitch
+	"dojo/_base/lang", // hitch, isArray
 	"dojo/_base/array", // forEach
 	"dojo/aspect", // after
 	"dojo/io/script", // get
+	"dojo/_base/Deferred",
+	"dojo/DeferredList",
 	"djeo/Engine",
 	"./Placemark",
 	"djeo/util/_base"
-], function(require, declare, lang, array, aspect, script, Engine, Placemark, u){
+], function(require, declare, lang, array, aspect, script, Deferred, DeferredList, Engine, Placemark, u){
 
 var GEngine = declare([Engine], {
 	
@@ -164,9 +166,48 @@ var GEngine = declare([Engine], {
 	},
 	
 	renderContainer: function(container, stylingOnly, theme) {
+		var deferred = new Deferred();
 		google.earth.executeBatch(this.ge, lang.hitch(this, function(){
-			this._renderContainer(container, stylingOnly, theme);
+			var deferreds = this._renderContainer(container, stylingOnly, theme);
+			if (deferreds && deferreds.length) {
+				var deferredList = new DeferredList(deferreds);
+				deferredList.then(function(){
+					deferred.resolve();
+				});
+			}
+			else {
+				// resolve deferred immediately
+				deferred.resolve();
+			}
 		}));
+		return deferred;
+	},
+	
+	_renderContainer: function(container, stylingOnly, theme) {
+		if (!container.visible) return;
+		if (container.features.length == 0 && !stylingOnly) {
+			container.parent.numVisibleFeatures++;
+		}
+		var deferreds = [];
+		array.forEach(container.features, function(feature){
+			if (feature.isContainer || feature.visible) {
+				var _deferreds = feature._render(stylingOnly, theme);
+				if (_deferreds) {
+					if (lang.isArray(_deferreds)) {
+						// FeatureContainer
+						// copy elements from deferred to deferreds
+						array.forEach(_deferreds, function(_deferred){
+							deferreds.push(_deferred);
+						});
+					}
+					else {
+						// normal Feature (not a FeatureContainer)
+						deferreds.push(_deferreds);
+					}
+				}
+			}
+		});
+		return deferreds.length ? deferreds : null;
 	}
 });
 
