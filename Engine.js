@@ -11,6 +11,12 @@ define([
 	"./Placemark",
 	"djeo/util/_base"
 ], function(require, declare, lang, array, aspect, script, Deferred, DeferredList, Engine, Placemark, u){
+	
+var supportedLayers = {
+	roadmap: 1,
+	hybrid: 1,
+	terrain: 1
+};
 
 var GEngine = declare([Engine], {
 	
@@ -25,6 +31,7 @@ var GEngine = declare([Engine], {
 		this._require = require;
 		// set ignored dependencies
 		lang.mixin(this.ignoredDependencies, {"Highlight": 1});
+		this._supportedLayers = supportedLayers;
 		// initialize basic factories
 		this._initBasicFactories(new Placemark({
 			map: this.map
