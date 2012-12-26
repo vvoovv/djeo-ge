@@ -163,7 +163,7 @@ var GEngine = declare([Engine], {
 		}
 	},
 	
-	renderFeatures: function(/* Array|Object */features, /* Boolean */stylingOnly, /* String? */theme) {
+	renderFeatures: function(/* Array|Object */features, /* String? */theme, /* Boolean? */destroy) {
 		// summary:
 		//		Implementation of the renderFeatures method of djeo.Map
 		var args = arguments;
@@ -172,10 +172,10 @@ var GEngine = declare([Engine], {
 		}));
 	},
 	
-	renderContainer: function(container, stylingOnly, theme) {
+	renderContainer: function(container, theme, destroy) {
 		var deferred = new Deferred();
 		google.earth.executeBatch(this.ge, lang.hitch(this, function(){
-			var deferreds = this._renderContainer(container, stylingOnly, theme);
+			var deferreds = this._renderContainer(container, theme, destroy);
 			if (deferreds && deferreds.length) {
 				var deferredList = new DeferredList(deferreds);
 				deferredList.then(function(){
@@ -190,15 +190,15 @@ var GEngine = declare([Engine], {
 		return deferred;
 	},
 	
-	_renderContainer: function(container, stylingOnly, theme) {
+	_renderContainer: function(container, theme, destroy) {
 		if (!container.visible) return;
-		if (container.features.length == 0 && !stylingOnly) {
+		if (container.features.length == 0 && destroy) {
 			container.parent.numVisibleFeatures++;
 		}
 		var deferreds = [];
 		array.forEach(container.features, function(feature){
 			if (feature.isContainer || feature.visible) {
-				var _deferreds = feature._render(stylingOnly, theme);
+				var _deferreds = feature._render(theme, destroy);
 				if (_deferreds) {
 					if (lang.isArray(_deferreds)) {
 						// FeatureContainer

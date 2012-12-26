@@ -19,9 +19,9 @@ var Placemark = declare([P], {
 		this.ge = this.map.engine.ge;
 	},
 	
-	render: function(feature, stylingOnly, theme) {
+	render: function(feature, theme, destroy) {
 		google.earth.executeBatch(this.map.engine.ge, lang.hitch(this, function(){
-			this._render(feature, stylingOnly, theme);
+			this._render(feature, theme, destroy);
 		}));
 	},
 
