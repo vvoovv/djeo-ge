@@ -126,7 +126,7 @@ var Placemark = declare([P], {
 			scale = P.getScale(calculatedStyle, specificStyle, specificShapeStyle),
 			normalStyle = getNormalStyle(placemark),
 			// style has been already applied to the feature during a previous function call
-			styleApplied = feature.state.kmlIconScale !== undefined ? true : false;
+			styleApplied = feature.reg.kmlIconScale !== undefined ? true : false;
 
 		if (!shapeType && src) isVectorShape = false;
 		else if (!P.shapes[shapeType] && !styleApplied)
@@ -146,12 +146,12 @@ var Placemark = declare([P], {
 			kmlIconScale;
 		if (size) {
 			var kmlIconScale = isVectorShape ? scale*Math.max(size[0],size[1])/geBase.shapeSize : scale;
-			feature.state.kmlIconScale = kmlIconScale;
+			feature.reg.kmlIconScale = kmlIconScale;
 		}
 		else if (styleApplied) {
 			// check if we can apply relative scale (rScale)
 			var rScale = P.get("rScale", calculatedStyle, specificStyle, specificShapeStyle);
-			if (rScale !== undefined) kmlIconScale = rScale * feature.state.kmlIconScale;
+			if (rScale !== undefined) kmlIconScale = rScale * feature.reg.kmlIconScale;
 		}
 		iconStyle.setScale(kmlIconScale);
 

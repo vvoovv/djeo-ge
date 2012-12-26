@@ -11,7 +11,7 @@ return declare(null, {
 
 	process: function(event){
 		var feature = event.feature,
-			cs = feature.state.cs,
+			cs = feature.reg.cs,
 			balloon = this.balloon,
 			content = cs.info ? cs.info(feature) : this.content(feature)
 		;

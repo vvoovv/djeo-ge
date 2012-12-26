@@ -10,7 +10,7 @@ return declare(null, {
 	},
 
 	pointeroverAction: function(feature) {
-		var cs = feature.state.cs,
+		var cs = feature.reg.cs,
 			balloon = this.balloon,
 			content = cs.info ? cs.info(feature) : this.content(feature)
 		;
