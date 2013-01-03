@@ -1,6 +1,6 @@
 define([
 	"dojo/_base/declare",
-	"dojo/_base/lang",
+	"dojo/_base/lang", // hitch
 	"dojo/_base/Deferred",
 	"djeo/util/_base",
 	"./_base"
@@ -21,7 +21,7 @@ return declare(null, {
 
 		modelHref = u.isRelativeUrl(modelHref) ? u.baseUrl+engine.map.modelBasePath+modelHref : modelHref;
 
-		google.earth.fetchKml(ge, modelHref, dojo.hitch(this, function(kmlFeature) {
+		google.earth.fetchKml(ge, modelHref, lang.hitch(this, function(kmlFeature) {
 			if (kmlFeature) {
 				var kmlModel;
 				// derived from KmlContainer
@@ -34,8 +34,13 @@ return declare(null, {
 				}
 				if (kmlModel) {
 					if (e.altitudeModes[feature.altitudeMode]) kmlModel.setAltitudeMode(ge[e.altitudeModes[feature.altitudeMode]]);
-					//if (location) this.setLocation(feature.location, kmlModel);
-					feature.baseShapes[0] = kmlFeature;
+					feature.baseShapes[0] = kmlModel;
+					if (feature.coords) {
+						feature._set_coords(feature.coords);
+					}
+					if (feature.orientation !== undefined) {
+						feature._set_orientation(feature.orientation);
+					}
 					ge.getFeatures().appendChild(kmlModel.getParentNode());
 				}
 			}
@@ -44,34 +49,34 @@ return declare(null, {
 		return deferred;
 	},
 	
-	translate: function(position, feature) {
+	setCoords: function(coords, feature) {
 		if (feature.map.renderModels) {
-			if (feature.model) this.setLocation(position, feature.model);
+			this.setLocation(coords, feature);
 		}
 		else {
-			this.engine.factories.Placemark.translate(position, feature);
+			this.engine.factories.Placemark.setCoords(coords, feature);
 		}
 	},
 	
-	rotate: function(orientation, feature) {
+	setOrientation: function(orientation, feature) {
 		if (feature.map.renderModels) {
-			if (feature.model) this.setOrientation(orientation, feature.model);
+			this._setOrientation(orientation, feature.baseShapes[0]);
 		}
 		else {
 			var heading = this.orientation.heading;
-			if (heading !== undefined) this.engine.factories.Placemark.rotate(heading, feature);
+			if (heading !== undefined) this.engine.factories.Placemark.rotate(setOrientation, feature);
 		}
 	},
 	
-	setLocation: function(location, kmlModel) {
-		if (!location) return;
-		var kmlLocation = kmlModel.getLocation(),
+	setLocation: function(location, feature) {
+		var kmlModel = feature.baseShapes[0],
+			kmlLocation = kmlModel.getLocation(),
 			altitude = 0;
 		if (location.length==3) altitude = location[2];
 		kmlLocation.setLatLngAlt(location[1], location[0], altitude);
 	},
 	
-	setOrientation: function(orientation, kmlModel) {
+	_setOrientation: function(orientation, kmlModel) {
 		var kmlOrientation = kmlModel.getOrientation();
 		if (orientation.heading !== undefined) {
 			kmlOrientation.setHeading( u.radToDeg(orientation.heading) );
@@ -80,7 +85,7 @@ return declare(null, {
 	
 	remove: function(feature) {
 		if (feature.map.renderModels) {
-			var placemark = feature.model.getParentNode();
+			var placemark = feature.baseShapes[0].getParentNode();
 			placemark.getParentNode().getFeatures().removeChild(placemark);
 		}
 		else {

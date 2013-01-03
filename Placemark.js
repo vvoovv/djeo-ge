@@ -212,17 +212,19 @@ var Placemark = declare([P], {
 		}
 	},
 	
-	translate: function(position, feature) {
+	setCoords: function(coords, feature) {
 		var placemark = feature.baseShapes[0];
 
 		var kmlPoint = placemark.getGeometry();
-		if (position.length == 3) kmlPoint.setLatLngAlt(position[1], position[0], position[2]);
-		else kmlPoint.setLatLng(position[1], position[0]);
+		if (coords.length == 3) kmlPoint.setLatLngAlt(coords[1], coords[0], coords[2]);
+		else kmlPoint.setLatLng(coords[1], coords[0]);
 	},
-
-	rotate: function(heading, feature) {
+	
+	setOrientation: function(o, feature) {
 		var placemark = feature.baseShapes[0],
-			iconStyle = placemark.getStyleSelector().getIconStyle();
+			iconStyle = placemark.getStyleSelector().getIconStyle(),
+			heading = lang.isObject(o) ? o.heading : o
+		;
 
 		iconStyle.setHeading(u.radToDeg(heading));
 	}
