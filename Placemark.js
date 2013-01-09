@@ -1,6 +1,6 @@
 define([
 	"dojo/_base/declare", // declare
-	"dojo/_base/lang", // mixin, hitch
+	"dojo/_base/lang", // mixin, hitch, isObject
 	"dojo/_base/array", // forEach, map
 	"dojo/_base/Color",
 	"djeo/_base",
@@ -154,6 +154,14 @@ var Placemark = declare([P], {
 			if (rScale !== undefined) kmlIconScale = rScale * feature.reg.kmlIconScale;
 		}
 		iconStyle.setScale(kmlIconScale);
+		
+		if (!styleApplied) {
+			var heading = feature.orientation;
+			if (heading !== undefined) {
+				if (lang.isObject(heading)) heading = heading.heading;
+				iconStyle.setHeading(u.radToDeg(heading));
+			}
+		}
 
 		if (isVectorShape) applyFill(iconStyle, calculatedStyle, specificStyle, specificShapeStyle, true);
 	},
@@ -222,11 +230,10 @@ var Placemark = declare([P], {
 	
 	setOrientation: function(o, feature) {
 		var placemark = feature.baseShapes[0],
-			iconStyle = placemark.getStyleSelector().getIconStyle(),
-			heading = lang.isObject(o) ? o.heading : o
+			iconStyle = placemark.getStyleSelector().getIconStyle()
 		;
 
-		iconStyle.setHeading(u.radToDeg(heading));
+		iconStyle.setHeading(u.radToDeg(o));
 	}
 });
 
