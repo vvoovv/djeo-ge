@@ -16,7 +16,9 @@ var supportedLayers = {
 	roadmap: 1,
 	hybrid: 1,
 	terrain: 1
-};
+}
+globeEvents = {click: 1, mousemove: 1}
+;
 
 var GEngine = declare([Engine], {
 	
@@ -98,6 +100,24 @@ var GEngine = declare([Engine], {
 		method = this.normalizeCallback(feature, event, method, context);
 		google.earth.addEventListener(placemark, event, method);
 		return [placemark, event, method];
+	},
+	
+	onForMap: function(event, method, context) {
+		if (!(event in globeEvents)) return {remove: function(){}};
+		var globe = this.ge.getGlobe(),
+			callback =  function(e){
+				method.call(context, {
+					mapCoords: [e.getLongitude(), e.getLatitude()],
+					nativeEvent: e
+				});
+			}
+		;
+		google.earth.addEventListener(globe, event, callback);
+		return {
+			remove: function(){
+				google.earth.removeEventListener(globe, event, callback);
+			}
+		};
 	},
 	
 	disconnect: function(connection) {
